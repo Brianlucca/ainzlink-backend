@@ -15,5 +15,5 @@ app.use('/api/v1', urlRoutes);
 app.use('/', redirectRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta http://localhost:${PORT}`);
+  console.log(`Servidor escutando na porta ${PORT}`);
 });
