@@ -57,18 +57,18 @@ export const redirectToOriginalUrl = async (req, res) => {
     const urlData = urlDoc.data();
 
     if (urlData.expiresAt && urlData.expiresAt.toDate() < new Date()) {
-      return res.status(410).json({ error: 'Este link expirou.' }); // 410 Gone
-    }
-
-    if (urlData.passwordHash) {
-      return res.status(200).json({ passwordProtected: true });
+      return res.status(410).json({ error: 'Este link expirou.' });
     }
     
     await urlDocRef.update({ clicks: (urlData.clicks || 0) + 1 });
-    return res.redirect(urlData.originalUrl);
 
+    if (urlData.passwordHash) {
+      return res.status(200).json({ passwordProtected: true });
+    } else {
+      return res.status(200).json({ originalUrl: urlData.originalUrl });
+    }
   } catch (error) {
-    console.error('Erro ao redirecionar URL:', error);
+    console.error('Erro ao buscar URL:', error);
     return res.status(500).json({ error: 'Erro interno no servidor.' });
   }
 };
@@ -90,16 +90,14 @@ export const verifyPasswordAndRedirect = async (req, res) => {
     }
 
     const urlData = urlDoc.data();
-
     const isMatch = await bcrypt.compare(password, urlData.passwordHash);
 
     if (isMatch) {
       await urlDocRef.update({ clicks: (urlData.clicks || 0) + 1 });
       return res.status(200).json({ originalUrl: urlData.originalUrl });
     } else {
-      return res.status(401).json({ error: 'Senha incorreta.' }); // 401 Unauthorized
+      return res.status(401).json({ error: 'Senha incorreta.' });
     }
-
   } catch (error) {
     console.error('Erro ao verificar senha:', error);
     return res.status(500).json({ error: 'Erro interno no servidor.' });
