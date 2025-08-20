@@ -2,11 +2,11 @@
   "name": "ainzlink---back-end",
   "version": "1.0.0",
   "main": "src/server.js",
-    "type": "module",
-"scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js"
-},
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -16,6 +16,7 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "firebase-admin": "^13.4.0",
+    "nanoid": "^5.1.5",
     "shortid": "^2.2.17"
   },
   "devDependencies": {
