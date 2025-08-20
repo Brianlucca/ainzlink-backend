@@ -1,18 +1,17 @@
 import admin from 'firebase-admin';
 import 'dotenv/config';
 
-const firebaseCredentials = process.env.FIREBASE_CREDENTIALS_JSON;
+import serviceAccount from './firebase-credentials.json' with { type: 'json' };
 
-if (!firebaseCredentials) {
-  throw new Error('As credenciais do Firebase não foram encontradas nas variáveis de ambiente.');
+try {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+
+  console.log('Conexão com o Firebase estabelecida com sucesso!');
+} catch (error) {
+  console.error('Erro ao conectar com o Firebase:', error);
+  process.exit(1);
 }
-
-const serviceAccount = JSON.parse(firebaseCredentials);
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
-console.log('Firebase conectado com sucesso!');
 
 export const db = admin.firestore();
