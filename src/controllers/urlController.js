@@ -31,7 +31,9 @@ export const shortenUrl = async (req, res) => {
       urlData.passwordHash = await bcrypt.hash(password, saltRounds);
     }
     if (expiresAt) {
-      urlData.expiresAt = new Date(expiresAt);
+      const date = new Date(expiresAt);
+      date.setUTCHours(23, 59, 59, 999);
+      urlData.expiresAt = date;
     }
     await db.collection('urls').doc(shortCode).set(urlData);
     const baseUrl = process.env.BASE_URL;
@@ -56,11 +58,18 @@ export const redirectToOriginalUrl = async (req, res) => {
     if (urlData.expiresAt && urlData.expiresAt.toDate() < new Date()) {
       return res.status(410).json({ error: 'Este link expirou.' });
     }
-    await urlDocRef.update({ clicks: (urlData.clicks || 0) + 1 });
+    const isApiRequest = req.headers['x-requested-with'] === 'XMLHttpRequest';
+    if (!isApiRequest) {
+      await urlDocRef.update({ clicks: (urlData.clicks || 0) + 1 });
+    }
     if (urlData.passwordHash) {
       return res.status(200).json({ passwordProtected: true });
     } else {
-      return res.status(200).json({ originalUrl: urlData.originalUrl });
+      if (isApiRequest) {
+        return res.status(200).json({ originalUrl: urlData.originalUrl });
+      } else {
+        return res.redirect(urlData.originalUrl);
+      }
     }
   } catch (error) {
     console.error('Erro ao buscar URL:', error);
@@ -124,75 +133,63 @@ export const getUrlStats = async (req, res) => {
 };
 
 export const updateUrl = async (req, res) => {
-    try {
-        const { shortCode } = req.params;
-        const { token } = req.query;
-        const { originalUrl, password } = req.body;
-
-        if (!token) {
-            return res.status(401).json({ error: 'Token de administração é obrigatório.' });
-        }
-
-        const urlDocRef = db.collection('urls').doc(shortCode);
-        const urlDoc = await urlDocRef.get();
-
-        if (!urlDoc.exists) {
-            return res.status(404).json({ error: 'Link não encontrado.' });
-        }
-
-        const urlData = urlDoc.data();
-        if (urlData.adminToken !== token) {
-            return res.status(403).json({ error: 'Acesso negado. Token inválido.' });
-        }
-
-        const updates = {};
-        if (originalUrl) {
-            updates.originalUrl = originalUrl;
-        }
-        if (password) {
-            const saltRounds = 10;
-            updates.passwordHash = await bcrypt.hash(password, saltRounds);
-        } else if (password === null || password === '') {
-            updates.passwordHash = null;
-        }
-
-        if (Object.keys(updates).length === 0) {
-            return res.status(400).json({ error: 'Nenhuma informação para atualizar foi fornecida.' });
-        }
-
-        await urlDocRef.update(updates);
-        return res.status(200).json({ message: 'Link atualizado com sucesso.' });
-    } catch (error) {
-        console.error('Erro ao atualizar link:', error);
-        return res.status(500).json({ error: 'Erro interno no servidor.' });
+  try {
+    const { shortCode } = req.params;
+    const { token } = req.query;
+    const { originalUrl, password } = req.body;
+    if (!token) {
+      return res.status(401).json({ error: 'Token de administração é obrigatório.' });
     }
+    const urlDocRef = db.collection('urls').doc(shortCode);
+    const urlDoc = await urlDocRef.get();
+    if (!urlDoc.exists) {
+      return res.status(404).json({ error: 'Link não encontrado.' });
+    }
+    const urlData = urlDoc.data();
+    if (urlData.adminToken !== token) {
+      return res.status(403).json({ error: 'Acesso negado. Token inválido.' });
+    }
+    const updates = {};
+    if (originalUrl) {
+      updates.originalUrl = originalUrl;
+    }
+    if (password) {
+      const saltRounds = 10;
+      updates.passwordHash = await bcrypt.hash(password, saltRounds);
+    } else if (password === null || password === '') {
+      updates.passwordHash = null;
+    }
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'Nenhuma informação para atualizar foi fornecida.' });
+    }
+    await urlDocRef.update(updates);
+    return res.status(200).json({ message: 'Link atualizado com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao atualizar link:', error);
+    return res.status(500).json({ error: 'Erro interno no servidor.' });
+  }
 };
 
 export const deleteUrl = async (req, res) => {
-    try {
-        const { shortCode } = req.params;
-        const { token } = req.query;
-
-        if (!token) {
-            return res.status(401).json({ error: 'Token de administração é obrigatório.' });
-        }
-
-        const urlDocRef = db.collection('urls').doc(shortCode);
-        const urlDoc = await urlDocRef.get();
-
-        if (!urlDoc.exists) {
-            return res.status(404).json({ error: 'Link não encontrado.' });
-        }
-
-        const urlData = urlDoc.data();
-        if (urlData.adminToken !== token) {
-            return res.status(403).json({ error: 'Acesso negado. Token inválido.' });
-        }
-
-        await urlDocRef.delete();
-        return res.status(200).json({ message: 'Link deletado com sucesso.' });
-    } catch (error) {
-        console.error('Erro ao deletar link:', error);
-        return res.status(500).json({ error: 'Erro interno no servidor.' });
+  try {
+    const { shortCode } = req.params;
+    const { token } = req.query;
+    if (!token) {
+      return res.status(401).json({ error: 'Token de administração é obrigatório.' });
     }
+    const urlDocRef = db.collection('urls').doc(shortCode);
+    const urlDoc = await urlDocRef.get();
+    if (!urlDoc.exists) {
+      return res.status(404).json({ error: 'Link não encontrado.' });
+    }
+    const urlData = urlDoc.data();
+    if (urlData.adminToken !== token) {
+      return res.status(403).json({ error: 'Acesso negado. Token inválido.' });
+    }
+    await urlDocRef.delete();
+    return res.status(200).json({ message: 'Link deletado com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao deletar link:', error);
+    return res.status(500).json({ error: 'Erro interno no servidor.' });
+  }
 };
