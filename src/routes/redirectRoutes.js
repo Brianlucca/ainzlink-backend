@@ -4,7 +4,6 @@ import { redirectToOriginalUrl, verifyPasswordAndRedirect } from '../controllers
 const router = Router();
 
 router.get('/:shortCode', redirectToOriginalUrl);
-
 router.post('/:shortCode/verify', verifyPasswordAndRedirect);
 
 export default router;

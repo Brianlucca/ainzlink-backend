@@ -16,10 +16,8 @@ app.get('/', (req, res) => {
   res.status(200).json({ message: 'AinzLink API está no ar e operacional!' });
 });
 
-
-app.use('/api/v1', urlRoutes);
+app.use('/api/v1/urls', urlRoutes);
 app.use('/', redirectRoutes);
-
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor escutando na porta ${PORT}`);
