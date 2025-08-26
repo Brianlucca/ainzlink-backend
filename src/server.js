@@ -10,9 +10,10 @@ import redirectRoutes from './routes/redirectRoutes.js';
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
-    origin: "ainz-link.vercel.app",
+    origin: "https://ainz-link.vercel.app",
     methods: ["GET", "POST"]
   }
 });
@@ -21,7 +22,7 @@ initializeSocket(io);
 
 const PORT = process.env.PORT || 5001;
 
-app.use(cors());
+app.use(cors({ origin: "https://ainz-link.vercel.app" }));
 app.use(express.json());
 
 app.get('/', (req, res) => {
