@@ -51,17 +51,23 @@ export const redirectToOriginalUrl = async (req, res) => {
     const { shortCode } = req.params;
     const urlDocRef = db.collection('urls').doc(shortCode);
     const urlDoc = await urlDocRef.get();
+
     if (!urlDoc.exists) {
       return res.status(404).json({ error: 'URL não encontrada.' });
     }
+
     const urlData = urlDoc.data();
+
     if (urlData.expiresAt && urlData.expiresAt.toDate() < new Date()) {
       return res.status(410).json({ error: 'Este link expirou.' });
     }
-    const isApiRequest = req.headers['x-requested-with'] === 'XMLHttpRequest';
-    if (!isApiRequest) {
+    
+    const isApiRequest = req.query.json === 'true';
+
+    if (!isApiRequest && !urlData.passwordHash) {
       await urlDocRef.update({ clicks: (urlData.clicks || 0) + 1 });
     }
+    
     if (urlData.passwordHash) {
       return res.status(200).json({ passwordProtected: true });
     } else {
