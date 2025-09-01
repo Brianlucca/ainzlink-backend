@@ -52,11 +52,11 @@ export const redirectToOriginalUrl = async (req, res) => {
     const urlDocRef = db.collection('urls').doc(shortCode);
     const urlDoc = await urlDocRef.get();
     if (!urlDoc.exists) {
-      return res.status(404).send('Link não encontrado.');
+      return res.status(404).json({ error: 'URL não encontrada.' });
     }
     const urlData = urlDoc.data();
     if (urlData.expiresAt && urlData.expiresAt.toDate() < new Date()) {
-      return res.status(410).send('Este link expirou.');
+      return res.status(410).json({ error: 'Este link expirou.' });
     }
     const isApiRequest = req.query.json === 'true';
     if (urlData.passwordHash) {
@@ -76,7 +76,7 @@ export const redirectToOriginalUrl = async (req, res) => {
     }
   } catch (error) {
     console.error('Erro ao buscar URL:', error);
-    return res.status(500).send('Erro interno no servidor.');
+    return res.status(500).json({ error: 'Erro interno no servidor.' });
   }
 };
 
