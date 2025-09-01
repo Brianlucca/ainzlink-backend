@@ -7,7 +7,6 @@ import rateLimit from 'express-rate-limit';
 import './config/firebase.js';
 import initializeSocket from './websockets.js';
 import urlRoutes from './routes/urlRoutes.js';
-import redirectRoutes from './routes/redirectRoutes.js';
 
 const app = express();
 const server = http.createServer(app);
