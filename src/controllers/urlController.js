@@ -58,21 +58,13 @@ export const redirectToOriginalUrl = async (req, res) => {
     if (urlData.expiresAt && urlData.expiresAt.toDate() < new Date()) {
       return res.status(410).json({ error: 'Este link expirou.' });
     }
-    const isApiRequest = req.query.json === 'true';
+    
+    await urlDocRef.update({ clicks: (urlData.clicks || 0) + 1 });
+
     if (urlData.passwordHash) {
-      if (isApiRequest) {
-        return res.status(200).json({ passwordProtected: true });
-      } else {
-        const frontendUrl = process.env.FRONTEND_DOMAIN;
-        return res.redirect(`${frontendUrl}/${shortCode}`);
-      }
+      return res.status(200).json({ passwordProtected: true });
     } else {
-      await urlDocRef.update({ clicks: (urlData.clicks || 0) + 1 });
-      if (isApiRequest) {
-        return res.status(200).json({ originalUrl: urlData.originalUrl });
-      } else {
-        return res.redirect(urlData.originalUrl);
-      }
+      return res.status(200).json({ originalUrl: urlData.originalUrl });
     }
   } catch (error) {
     console.error('Erro ao buscar URL:', error);
