@@ -11,6 +11,8 @@ import urlRoutes from './routes/urlRoutes.js';
 const app = express();
 const server = http.createServer(app);
 
+app.set('trust proxy', 1);
+
 const corsOrigin = process.env.CORS_ORIGIN || "https://ainzlink.com";
 
 const io = new Server(server, {
