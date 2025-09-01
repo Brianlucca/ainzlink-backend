@@ -43,7 +43,6 @@ app.get('/favicon.ico', (req, res) => res.status(204).send());
 
 app.use('/api/', apiLimiter);
 app.use('/api/v1/urls', urlRoutes);
-app.use('/', redirectRoutes);
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor escutando na porta ${PORT}`);
