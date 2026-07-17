@@ -72,7 +72,7 @@ const requireAdmin = async (shortCode, token, user) => {
 
 const pickDestination = (link, context) => {
   const matchingRule = (link.rules || []).find((rule) => (
-    (rule.type === 'device' && rule.value === context.device)
+    (rule.type === 'device' && (rule.value === context.platform || rule.value === context.device))
     || (rule.type === 'country' && rule.value === context.country.toLowerCase())
   ));
   if (matchingRule) return matchingRule.url;
