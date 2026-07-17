@@ -49,7 +49,7 @@ export const verifyTurnstile = (expectedAction) => async (req, res, next) => {
         errorCodes: result['error-codes'],
       });
       return next(new AppError(
-        'A verificacao de seguranca expirou ou falhou. Tente novamente.',
+        'A verificação de segurança expirou ou falhou. Tente novamente.',
         403,
         'TURNSTILE_FAILED',
       ));
@@ -60,7 +60,7 @@ export const verifyTurnstile = (expectedAction) => async (req, res, next) => {
   } catch (error) {
     console.error('Erro ao validar Turnstile:', error.message);
     return next(new AppError(
-      'Nao foi possivel validar a seguranca agora.',
+      'Não foi possível validar a segurança agora.',
       503,
       'TURNSTILE_UNAVAILABLE',
     ));

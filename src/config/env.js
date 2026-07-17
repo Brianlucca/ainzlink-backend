@@ -2,7 +2,7 @@ const required = (name, fallback) => {
   const value = process.env[name] || fallback;
 
   if (!value) {
-    throw new Error(`Variavel de ambiente obrigatoria ausente: ${name}`);
+    throw new Error(`Variável de ambiente obrigatória ausente: ${name}`);
   }
 
   return value.replace(/\/+$/, '');

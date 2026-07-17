@@ -26,7 +26,11 @@ export default function initializeSocket(io) {
         );
         acknowledge?.({ ok: true });
       } catch (error) {
-        acknowledge?.({ ok: false, error: error.message });
+        console.error('Erro ao autorizar estatísticas em tempo real:', error);
+        acknowledge?.({
+          ok: false,
+          error: 'Não foi possível acompanhar as estatísticas em tempo real.',
+        });
       }
     });
 

@@ -13,7 +13,7 @@ const toDate = (value) => value?.toDate?.() || value || null;
 
 const requireUrl = (value) => {
   if (!value || !isValidHttpUrl(value)) {
-    throw new AppError('Informe uma URL HTTP ou HTTPS valida.', 400, 'INVALID_URL');
+    throw new AppError('Informe uma URL HTTP ou HTTPS válida.', 400, 'INVALID_URL');
   }
   const hostname = new URL(value).hostname.toLowerCase();
   if (
@@ -106,9 +106,9 @@ const decodeDestination = (token) => {
 };
 
 const getAvailability = (link, now = new Date()) => {
-  if (link.status === 'disabled') return ['LINK_DISABLED', 'Este link esta desativado.'];
+  if (link.status === 'disabled') return ['LINK_DISABLED', 'Este link está desativado.'];
   const startsAt = toDate(link.startsAt);
-  if (startsAt && startsAt > now) return ['LINK_NOT_STARTED', 'Este link ainda não esta ativo.'];
+  if (startsAt && startsAt > now) return ['LINK_NOT_STARTED', 'Este link ainda não está ativo.'];
   const expiresAt = toDate(link.expiresAt);
   if (expiresAt && expiresAt < now) return ['LINK_EXPIRED', 'Este link expirou.'];
   return null;
@@ -163,10 +163,10 @@ export const urlService = {
     requireUrl(input.originalUrl);
     const normalizedCode = input.customCode?.trim();
     if (normalizedCode && !CUSTOM_CODE_PATTERN.test(normalizedCode)) {
-      throw new AppError('Alias invalido. Use 3 a 40 letras, numeros, _ ou -.', 400, 'INVALID_CUSTOM_CODE');
+      throw new AppError('Alias inválido. Use de 3 a 40 letras, números, _ ou -.', 400, 'INVALID_CUSTOM_CODE');
     }
     if (normalizedCode && await urlRepository.findByCode(normalizedCode)) {
-      throw new AppError('Este nome personalizado ja está em uso.', 409, 'CODE_IN_USE');
+      throw new AppError('Este nome personalizado já está em uso.', 409, 'CODE_IN_USE');
     }
 
     const shortCode = normalizedCode || nanoid(8);
@@ -192,12 +192,12 @@ export const urlService = {
     if (input.password) data.passwordHash = await bcrypt.hash(input.password, 10);
     if (input.startsAt) {
       const startsAt = new Date(input.startsAt);
-      if (Number.isNaN(startsAt.getTime())) throw new AppError('Data inicial invalida.', 400, 'INVALID_START');
+      if (Number.isNaN(startsAt.getTime())) throw new AppError('Data inicial inválida.', 400, 'INVALID_START');
       data.startsAt = startsAt;
     }
     if (input.expiresAt) {
       const expiration = parseFutureExpiration(input.expiresAt);
-      if (!expiration) throw new AppError('Data de expiração invalida.', 400, 'INVALID_EXPIRATION');
+      if (!expiration) throw new AppError('Data de expiração inválida.', 400, 'INVALID_EXPIRATION');
       data.expiresAt = expiration;
     }
     if (data.startsAt && data.expiresAt && data.expiresAt <= data.startsAt) {
@@ -279,14 +279,14 @@ export const urlService = {
     if (input.startsAt !== undefined) {
       const startsAt = input.startsAt ? new Date(input.startsAt) : null;
       if (startsAt && Number.isNaN(startsAt.getTime())) {
-        throw new AppError('Data inicial invalida.', 400, 'INVALID_START');
+        throw new AppError('Data inicial inválida.', 400, 'INVALID_START');
       }
       updates.startsAt = startsAt;
     }
     if (input.expiresAt !== undefined) {
       const expiresAt = input.expiresAt ? parseFutureExpiration(input.expiresAt) : null;
       if (input.expiresAt && !expiresAt) {
-        throw new AppError('Data de expiração invalida.', 400, 'INVALID_EXPIRATION');
+        throw new AppError('Data de expiração inválida.', 400, 'INVALID_EXPIRATION');
       }
       updates.expiresAt = expiresAt;
     }
@@ -319,7 +319,7 @@ export const urlService = {
       ...context,
       createdAt: new Date(),
     });
-    return { message: 'Denuncia recebida.' };
+    return { message: 'Denúncia recebida.' };
   },
 
   authorizeAdmin(shortCode, token, user) {

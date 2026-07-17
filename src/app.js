@@ -11,7 +11,7 @@ const corsOptions = {
     if (!origin || env.corsOrigins.includes(origin.replace(/\/+$/, ''))) {
       return callback(null, true);
     }
-    return callback(new AppError('Origem nao permitida pelo CORS.', 403, 'CORS_DENIED'));
+    return callback(new AppError('Origem não permitida.', 403, 'CORS_DENIED'));
   },
 };
 
@@ -21,7 +21,7 @@ const apiLimiter = rateLimit({
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   message: {
-    error: 'Muitas requisicoes. Tente novamente mais tarde.',
+    error: 'Muitas requisições. Tente novamente mais tarde.',
     code: 'RATE_LIMITED',
   },
 });
@@ -45,7 +45,7 @@ export const createApp = () => {
   app.use(express.json({ limit: '16kb' }));
 
   app.get('/', (req, res) => {
-    res.json({ message: 'AinzLink API esta no ar.', environment: env.nodeEnv });
+    res.json({ message: 'AinzLink API está no ar.' });
   });
   app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

@@ -1,7 +1,7 @@
 import { AppError } from '../errors/AppError.js';
 
 export const notFoundHandler = (req, res) => {
-  res.status(404).json({ error: 'Rota nao encontrada.', code: 'ROUTE_NOT_FOUND' });
+  res.status(404).json({ error: 'Rota não encontrada.', code: 'ROUTE_NOT_FOUND' });
 };
 
 export const errorHandler = (error, req, res, next) => {
