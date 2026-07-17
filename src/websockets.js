@@ -1,34 +1,37 @@
-import { db } from './config/firebase.js';
+import { urlRepository } from './repositories/urlRepository.js';
+import { urlService } from './services/urlService.js';
+import { auth } from './config/firebase.js';
 
 export default function initializeSocket(io) {
   io.on('connection', (socket) => {
-    console.log('Um cliente se conectou via WebSocket:', socket.id);
-
     let unsubscribe = null;
 
-    socket.on('subscribeToLinkStats', (shortCode) => {
-      if (!shortCode) return;
-      
-      console.log(`Cliente ${socket.id} está observando o link: ${shortCode}`);
-      
-      unsubscribe = db.collection('urls').doc(shortCode).onSnapshot((snapshot) => {
-        if (snapshot.exists) {
-          const urlData = snapshot.data();
-          socket.emit('linkStatsUpdate', {
-            clicks: urlData.clicks,
-            originalUrl: urlData.originalUrl,
-          });
-        }
-      }, (error) => {
-        console.error(`Erro ao observar o link ${shortCode}:`, error);
-      });
+    socket.on('subscribeToLinkStats', async ({ shortCode, token, userToken }, acknowledge) => {
+      try {
+        if (unsubscribe) unsubscribe();
+        const user = userToken ? await auth.verifyIdToken(userToken) : null;
+        await urlService.authorizeAdmin(shortCode, token, user);
+
+        unsubscribe = urlRepository.subscribe(
+          shortCode,
+          (link) => {
+            if (link) {
+              socket.emit('linkStatsUpdate', {
+                clicks: link.clicks || 0,
+                originalUrl: link.originalUrl,
+              });
+            }
+          },
+          (error) => console.error(`Erro ao observar ${shortCode}:`, error),
+        );
+        acknowledge?.({ ok: true });
+      } catch (error) {
+        acknowledge?.({ ok: false, error: error.message });
+      }
     });
 
     socket.on('disconnect', () => {
-      console.log('Um cliente se desconectou:', socket.id);
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      if (unsubscribe) unsubscribe();
     });
   });
 }

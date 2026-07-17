@@ -1,20 +1,31 @@
 import { Router } from 'express';
 import {
-  shortenUrl,
-  getUrlStats,
-  updateUrl,
+  claimUrl,
   deleteUrl,
+  getUrlAnalytics,
+  getUrlStats,
+  listUrls,
   redirectToOriginalUrl,
-  verifyPasswordAndRedirect
+  reportUrl,
+  shortenUrl,
+  updateUrl,
+  verifyPasswordAndRedirect,
 } from '../controllers/urlController.js';
+import { asyncHandler } from '../middlewares/asyncHandler.js';
+import { optionalAuth, requireAuth } from '../middlewares/auth.js';
+import { verifyTurnstile } from '../middlewares/turnstile.js';
 
 const router = Router();
 
-router.post('/shorten', shortenUrl);
-router.get('/:shortCode/stats', getUrlStats);
-router.put('/:shortCode', updateUrl);
-router.delete('/:shortCode', deleteUrl);
-router.get('/:shortCode', redirectToOriginalUrl);
-router.post('/:shortCode/verify', verifyPasswordAndRedirect);
+router.get('/', requireAuth, asyncHandler(listUrls));
+router.post('/', optionalAuth, verifyTurnstile('create_link'), asyncHandler(shortenUrl));
+router.post('/:shortCode/claim', requireAuth, asyncHandler(claimUrl));
+router.get('/:shortCode/stats', optionalAuth, asyncHandler(getUrlStats));
+router.get('/:shortCode/analytics', optionalAuth, asyncHandler(getUrlAnalytics));
+router.put('/:shortCode', optionalAuth, asyncHandler(updateUrl));
+router.delete('/:shortCode', optionalAuth, asyncHandler(deleteUrl));
+router.post('/:shortCode/report', verifyTurnstile('report_link'), asyncHandler(reportUrl));
+router.post('/:shortCode/verify', asyncHandler(verifyPasswordAndRedirect));
+router.get('/:shortCode', asyncHandler(redirectToOriginalUrl));
 
 export default router;
