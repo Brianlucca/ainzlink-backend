@@ -140,11 +140,21 @@ const groupAnalytics = (events) => {
   const increment = (target, key) => {
     target[key || 'Desconhecido'] = (target[key || 'Desconhecido'] || 0) + 1;
   };
-  const result = { daily: {}, devices: {}, browsers: {}, countries: {}, recent: [] };
+  const result = {
+    daily: {},
+    devices: {},
+    platforms: { ios: 0, android: 0 },
+    browsers: {},
+    countries: {},
+    recent: [],
+  };
   events.forEach((event) => {
     const createdAt = toDate(event.createdAt);
     increment(result.daily, createdAt?.toISOString?.().slice(0, 10));
     increment(result.devices, event.device);
+    if (event.platform === 'ios' || event.platform === 'android') {
+      increment(result.platforms, event.platform);
+    }
     increment(result.browsers, event.browser);
     increment(result.countries, event.country);
   });
